@@ -1,3 +1,4 @@
+import Head from 'next/head';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { GetStaticPaths, GetStaticProps } from 'next';
@@ -7,6 +8,7 @@ import { convertDurationToTimeString } from '../../utils/convertDurationToTimeSt
 import styles from './episode.module.scss';
 import Image from 'next/image';
 import Link from 'next/link';
+import { usePlayer } from '../contexts/PlayerContext';
 
 
 type Episode = {
@@ -26,8 +28,13 @@ type EpisodeProps = {
 };
 
 export default function Episode({ episode }: EpisodeProps) {
+
+    const { play } = usePlayer();
     return (
         <div className={styles.episode}>
+            <Head>
+              <title>{episode.title}</title>
+            </Head>
             <div className={styles.thumbnailContainer}>
                 <Link href="/">
                     <button type="button">
@@ -41,7 +48,7 @@ export default function Episode({ episode }: EpisodeProps) {
                     objectFit = "cover"
                 />
 
-                <button>
+                <button onClick={() => play(episode)}>
                     <img src="/play.svg" alt="Tocar episódio"></img>
                 </button>
             </div>
@@ -61,7 +68,7 @@ export default function Episode({ episode }: EpisodeProps) {
 export const getStaticPaths: GetStaticPaths = async () => {
     return {
         paths: [],
-        fallback: 'blocking'
+        fallback: 'blocking' //incremental static regeneration
     }
 }
 
@@ -84,7 +91,7 @@ export const getStaticProps: GetStaticProps = async (ctx) => {
     
     return {
         props: {
-            episode,
+            episode
         },
         revalidate: 60 * 60 * 24, //24 horas
 
